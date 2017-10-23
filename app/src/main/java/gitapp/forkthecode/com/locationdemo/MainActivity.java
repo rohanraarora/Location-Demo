@@ -2,6 +2,10 @@ package gitapp.forkthecode.com.locationdemo;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -17,9 +21,12 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,LocationListener {
 
     GoogleApiClient apiClient;
+    SensorManager sensorManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +39,49 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 .addApi(LocationServices.API)
                 .build();
 
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+
+        List<Sensor> sensors = sensorManager.getSensorList(Sensor.TYPE_ALL);
+
+        Sensor light = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+        if(light != null){
+            sensorManager.registerListener(new SensorEventListener() {
+                @Override
+                public void onSensorChanged(SensorEvent event) {
+
+                    float lux = event.values[0];
+                    Log.i("CN log","Lux: " + lux);
+
+                }
+
+                @Override
+                public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+                }
+            },light,SensorManager.SENSOR_DELAY_NORMAL);
+        }
+
+        Sensor acc = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        if(acc != null){
+
+            sensorManager.registerListener(new SensorEventListener() {
+                @Override
+                public void onSensorChanged(SensorEvent event) {
+                    float x = event.values[0];
+                    float y = event.values[1];
+                    float z = event.values[2];
+
+                    Log.i("CN log","X: " + x + " Y: " + y + " Z: " + z);
+
+                }
+
+                @Override
+                public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+                }
+            },acc,SensorManager.SENSOR_DELAY_NORMAL);
+
+        }
 
     }
 
@@ -39,13 +89,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     protected void onStart() {
         Log.i("CN Log", "Start");
         super.onStart();
-        apiClient.connect();
+        //apiClient.connect();
     }
 
     @Override
     protected void onStop() {
         Log.i("CN Log", "Stop");
-        apiClient.disconnect();
+        //apiClient.disconnect();
         super.onStop();
     }
 
